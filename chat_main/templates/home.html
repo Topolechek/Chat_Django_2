@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends 'base.html' %}
+    {% block content %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+
+<div class="container choice-create col-lg-4 col-sm-10">
+    <h2 class="text-center">Выберите или создайте чат</h2>
+    <div class="d-grid gap-2 mb-2">
+        {% for room in rooms %}
+        <a class="btn btn-primary text-start" href="{% url 'room' room.name %}">
+            {{ room.name }}
+        </a>
+        {% endfor %}
+    </div>
+    <div>
+        <form id="post-form" method="POST" action="checkview">
+            {% csrf_token %}
+
+            <div class="container-fluid text-center">
+                <div class="row">
+
+                    <div class="col-8" style="padding: 0px;">
+                        <input class="form-control" type="text" name="room_name" id="room_name"
+                               placeholder="Введите название чата"/>
+                        <input type="hidden" name="username" id="username"/>
+
+                    </div>
+                    <div class="col-4 d-grid" style="padding: 0px;">
+                        <input class="ms-2 btn btn-primary" type="submit" value="Создать"/>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+</body>
+
+{% endblock %}
+</html>

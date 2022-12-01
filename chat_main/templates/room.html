@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% extends 'base.html' %}
+    {% block content %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/style/style.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<br>
+<section>
+
+    <div class="container chat text-center col-lg-6 col-sm-10 mt-2">
+
+        <div class="row align-items-center text-start">
+            <div class="col-10"><h2>Чат: {{room}}</h2></div>
+            <span class="border"></span>
+            <div id='send_msg'  class="mb-2">
+                <div id="display"></div>
+            </div>
+
+            <div class="container">
+                <form id="post-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-10 col-sm-10" style="padding: 10px;">
+                            <input type="hidden" name="username" id="username" value="{{ user.username }}"/>
+                            <input type="hidden" name="room_id" id="room_id" value="{{room_name.pk}}"/>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-10 col-sm-10" style="padding: 5px;">
+                                <input class="form-control" type="text" spellcheck="true" name="message" id="message" width="100px"/>
+                            </div>
+
+                            <div class="col-sm-2 col-lg-2 d-grid" style="padding: 5px;">
+                                <input class="btn btn-primary" type="submit" value="Отправить">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 col-sm-6" style="padding: 5px;">
+                                <a class="btn btn-primary d-grid mb-2" href="{% url 'home' %}">Назад</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+<script>
+$(document).ready(function(){
+
+setInterval(function(){
+    $.ajax({
+        type: 'GET',
+        url : "/getMessages/{{room}}/",
+        success: function(response){
+            console.log(response);
+            $("#display").empty();
+            for (var key in response.messages)
+                if (response.messages[key].user == '{{ user.username }}')
+                {
+                    var temp="<div class='container msgesr'><b>"+response.messages[key].user+"</b><p>"+response.messages[key].value+"</p><span class='is_im msg_time'>"+response.messages[key].date.slice(11, 16)+' ✔️'+"</span></div>";
+                    $("#display").append(temp);
+                } else
+                {
+                    var temp="<div class='container msgesl'><b>"+response.messages[key].user+"</b><p>"+response.messages[key].value+"</p><span class='is_other msg_time'>"+response.messages[key].date.slice(11, 16)+' ✔️'+"</span></div>";
+                    $("#display").append(temp);
+                }
+        },
+        error: function(response){
+            //alert('An error occured')
+        }
+    });
+},1000);
+})
+
+
+</script>
+
+
+</body>
+
+<script type="text/javascript">
+
+  $(document).on('submit','#post-form',function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type:'POST',
+      url:'/send',
+      data:{
+          username:$('#username').val(),
+          room_id:$('#room_id').val(),
+          message:$('#message').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function(data){
+         //alert(data)
+      }
+    });
+    document.getElementById('message').value = ''
+  });
+
+
+
+
+</script>
+
+<script>
+var timer;
+var isPaused = false;
+
+$(window).on('wheel', function(){
+	isPaused = true;
+	clearTimeout(timer);
+	timer = window.setTimeout(function(){
+		isPaused = false;
+	}, 10000000);
+});
+
+window.setInterval(function(){
+	if(!isPaused){
+		$("#send_msg").scrollTop($("#send_msg")[0].scrollHeight);
+	}
+}, 1000);
+</script>
+
+{% endblock %}
+</html>
